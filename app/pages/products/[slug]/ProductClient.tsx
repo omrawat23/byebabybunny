@@ -1,7 +1,7 @@
 // app/products/[slug]/ProductClient.tsx
 'use client';
 
-import { fetchProducts, type Product } from '@/lib/productService';
+import { type Product } from '@/lib/productService';
 import Image from 'next/image';
 
 interface ProductClientProps {
@@ -15,7 +15,7 @@ export default function ProductClient({ product }: ProductClientProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <Image 
-            src={product.asset} 
+            src={product.asset.imageUrl} 
             alt={product.itemName} 
             className="w-full rounded-lg"
           />

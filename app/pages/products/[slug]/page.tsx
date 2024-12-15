@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: PageProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <Image 
-            src={product.asset} 
+            src={product.asset.imageUrl} 
             alt={product.itemName} 
             className="w-full rounded-lg"
           />
