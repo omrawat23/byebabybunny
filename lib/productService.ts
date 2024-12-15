@@ -1,5 +1,10 @@
 import hygraphClient, { gql } from '@/lib/hygraph-client';
 
+// Define a more explicit error type
+interface GraphQLError {
+  message: string;
+}
+
 export interface Product {
   id: string;
   itemName: string;
@@ -7,10 +12,10 @@ export interface Product {
   itemPrice: number;
   itemCategory: string;
   asset: {
-      imageUrl: string;
-    };
-    itemSize: string[];
     imageUrl: string;
+  };
+  itemSize: string[];
+  imageUrl: string;
 }
 
 export interface ProductsResponse {
@@ -43,7 +48,9 @@ export const fetchProducts = async (): Promise<{
     const response = await hygraphClient.request<ProductsResponse>(query);
    
     if (response && response.items) {
+      // Use Array.from to avoid TypeScript iteration issues
       const uniqueCategories = Array.from(new Set(response.items.map(item => item.itemCategory)));
+      
       return {
         products: response.items,
         categories: uniqueCategories,
@@ -51,9 +58,27 @@ export const fetchProducts = async (): Promise<{
     }
    
     throw new Error('No items found in response');
-  } catch (err) {
+  } catch (err: unknown) {
+    // Type-safe error handling
     console.error('GraphQL Error Details:', err);
-    const errorMessage = err.response?.errors?.[0]?.message || err.message || 'Failed to load products';
+    
+    let errorMessage = 'Failed to load products';
+    
+    // Type-safe error message extraction
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    } else if (typeof err === 'object' && err !== null && 'message' in err) {
+      errorMessage = (err as { message: string }).message;
+    }
+    
+    // Additional type-safe error handling for GraphQL specific errors
+    if (err instanceof Error && 'response' in err) {
+      const graphqlError = (err as { response?: { errors?: GraphQLError[] } }).response?.errors?.[0];
+      if (graphqlError) {
+        errorMessage = graphqlError.message;
+      }
+    }
+    
     return {
       products: [],
       categories: [],
@@ -66,7 +91,6 @@ export const fetchProductBySlug = async (slug: string): Promise<{
   product?: Product;
   error?: string;
 }> => {
-  // Assuming the slug is actually the ID
   const query = gql`
     query ProductById($id: ID!) {
       item(where: { id: $id }) {
@@ -82,7 +106,6 @@ export const fetchProductBySlug = async (slug: string): Promise<{
   `;
 
   try {
-    // Use the slug parameter as the ID in the query
     const response = await hygraphClient.request<SingleProductResponse>(query, { id: slug });
 
     if (response && response.item) {
@@ -92,9 +115,26 @@ export const fetchProductBySlug = async (slug: string): Promise<{
     }
 
     throw new Error('Product not found');
-  } catch (err) {
+  } catch (err: unknown) {
+    // Similar type-safe error handling as in fetchProducts
     console.error('GraphQL Error Details:', err);
-    const errorMessage = err.response?.errors?.[0]?.message || err.message || 'Failed to load product';
+    
+    let errorMessage = 'Failed to load product';
+    
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    } else if (typeof err === 'object' && err !== null && 'message' in err) {
+      errorMessage = (err as { message: string }).message;
+    }
+    
+    // Additional type-safe error handling for GraphQL specific errors
+    if (err instanceof Error && 'response' in err) {
+      const graphqlError = (err as { response?: { errors?: GraphQLError[] } }).response?.errors?.[0];
+      if (graphqlError) {
+        errorMessage = graphqlError.message;
+      }
+    }
+    
     return {
       error: `GraphQL Error: ${errorMessage}`
     };
