@@ -64,7 +64,7 @@ function updateCart(product: Product, cart: CartItem[]): CartItem[] {
 function removeCart(id: number, cart: CartItem[]): CartItem[] {
   return cart
     .map((item) => {
-      if (item.id === id) {
+      if (item.id) {
         return { ...item, count: item.count - 1 };
       }
       return item;
