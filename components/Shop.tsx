@@ -142,7 +142,7 @@ export default function Shop() {
                       width={1000}
                       height={1000}
                       src={product.image}
-                      alt={product.alt || product.name}
+                      alt="image"
                       className="w-full h-full object-cover"
                     />
                   </div>
