@@ -6,8 +6,11 @@ export interface Product {
   itemDescription: string;
   itemPrice: number;
   itemCategory: string;
-  asset: string;
-  itemSize: string;
+  asset: {
+    imageUrl: string;
+  };
+  itemSize: string[];
+  imageUrl: string;
 }
 
 export interface ProductsResponse {

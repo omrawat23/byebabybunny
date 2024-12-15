@@ -7,5 +7,6 @@ export interface Product {
       imageUrl: string;
     };
     itemSize: string[];
+    imageUrl: string;
   }
   
